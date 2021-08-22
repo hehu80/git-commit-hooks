@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TICKET_PREFIX="GFA"
+TICKET_PREFIX="JIRA"
 INPUT_FILE=${1}
 START_LINE=$(head -n1 "${INPUT_FILE}")
 BRANCH_NAME=$(git branch | awk '/\*/ { print $2; }')
