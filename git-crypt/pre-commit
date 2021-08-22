@@ -1,0 +1,39 @@
+#!/bin/bash
+
+mapfile -t CHANGED_FILES < <( git status --short | grep -v "^D" | cut -c 4- )
+mapfile -t GIT_CRYPT_FILES < <(grep -E "filter=git-crypt\s+diff=git-crypt\s*$" .gitattributes | cut -d' ' -f1 | sed -e "s/\./\\\./g" | sed -e "s/\*/.*/g")
+
+function has_secret {
+  grep -Eq "^\s*kind\:\s+Secret$" "${1}"
+}
+
+ALL_SECRETS_ENCRYPTED=true
+
+for FILE in "${CHANGED_FILES[@]}"; do
+
+  if has_secret "${FILE}";
+  then
+    ENCRYPTED=false
+    for GIT_CRYPT_FILE in "${GIT_CRYPT_FILES[@]}"; do
+      if [[ $FILE =~ ^${GIT_CRYPT_FILE}$ ]] || [[ $(basename "${FILE}") =~ ^${GIT_CRYPT_FILE}$ ]];
+      then
+        printf "encrypted file with secret found: %s\n" "${FILE}"
+        ENCRYPTED=true
+        break
+      fi
+    done
+    if [[ ${ENCRYPTED} == false ]];
+    then
+      printf "unencrypted file with secret found: %s\n" "${FILE}"
+      ALL_SECRETS_ENCRYPTED=false
+    fi
+  fi
+
+done
+
+if [[ ${ALL_SECRETS_ENCRYPTED} == false ]];
+then
+  exit 1
+fi
+
+exit 0
