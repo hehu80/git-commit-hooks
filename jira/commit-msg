@@ -1,0 +1,26 @@
+#!/bin/bash
+
+TICKET_PREFIX="GFA"
+INPUT_FILE=${1}
+START_LINE=$(head -n1 "${INPUT_FILE}")
+BRANCH_NAME=$(git branch | awk '/\*/ { print $2; }')
+
+if [[ "${BRANCH_NAME}" != "master" ]];  then
+  if [[ "${BRANCH_NAME}" =~ ^feature/ ]]; then
+    BRANCH_NAME=$(echo "${BRANCH_NAME}" | grep -oP "^feature/\K.*")
+  fi
+
+  if [[ "${BRANCH_NAME}" =~ ^${TICKET_PREFIX}-[0-9]+ ]]; then
+    if [[ ! "${START_LINE}" =~ ^${BRANCH_NAME} ]]; then
+      echo "commit message should start with branch name ${BRANCH_NAME}"
+      exit 1
+    fi
+  fi
+fi
+
+if [[ ! "${START_LINE}" =~ ^(${TICKET_PREFIX}-[0-9]+|NOJIRA)\ [a-z] ]]; then
+    echo "commit message should start with ${TICKET_PREFIX}-1234 or NOJIRA"
+    exit 1
+fi
+
+exit 0
