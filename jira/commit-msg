@@ -18,7 +18,7 @@ if [[ "${BRANCH_NAME}" != "master" ]];  then
   fi
 fi
 
-if [[ ! "${START_LINE}" =~ ^(${TICKET_PREFIX}-[0-9]+|NOJIRA|Merge)\ [a-z] ]]; then
+if [[ ! "${START_LINE}" =~ ^(${TICKET_PREFIX}-[0-9]+|NOJIRA|Merge|Revert)\ [a-z] ]]; then
     echo "commit message should start with ${TICKET_PREFIX}-1234 or NOJIRA"
     exit 1
 fi
